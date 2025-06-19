@@ -2,6 +2,8 @@
 
 A live scoreboard application for football matches, displaying scores and ordering games by total score and recent activity.
 
+![Screenshot of the scoreboard application](./score-board/src/assets/app.png)
+
 ## Features
 
 * Start, update, and finish games.
