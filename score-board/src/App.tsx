@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import ScoreBoard from "./lib/ScoreBoard";
 import "./App.css";
 import type { Match } from "./lib/types";
@@ -7,18 +7,25 @@ import { MatchesList, NewGameForm } from "./components";
 const scoreBoardInstance = new ScoreBoard();
 
 function App() {
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [matches, setMatches] = useState<Match[]>(
+    scoreBoardInstance.getSummary()
+  );
   const [error, setError] = useState<string>("");
 
-  // Function to refresh the summary and update React state
-  const refreshSummary = useCallback(() => {
-    setMatches(scoreBoardInstance.getSummary());
-  }, []);
-
-  // Initial load of summary
+  // Use useEffect to subscribe to changes from the ScoreBoard instance
   useEffect(() => {
-    refreshSummary();
-  }, [refreshSummary]);
+    // When the scoreboard notifies us of a change, get the latest summary
+    const handleScoreBoardChange = () => {
+      setMatches(scoreBoardInstance.getSummary());
+    };
+
+    // Subscribe to changes
+    const unsubscribe = scoreBoardInstance.subscribe(handleScoreBoardChange);
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="App">
@@ -28,14 +35,12 @@ function App() {
         scoreBoardInstance={scoreBoardInstance}
         error={error}
         setError={setError}
-        refreshSummary={refreshSummary}
       />
 
       <MatchesList
         scoreBoardInstance={scoreBoardInstance}
         matches={matches}
         setError={setError}
-        refreshSummary={refreshSummary}
       />
     </div>
   );

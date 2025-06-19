@@ -6,17 +6,13 @@ import type { MatchesListProps } from "../types";
 type MatchItemProps = {
   match: Match;
   setEditError: Dispatch<React.SetStateAction<string>>;
-} & Pick<
-  MatchesListProps,
-  "scoreBoardInstance" | "setError" | "refreshSummary"
->;
+} & Pick<MatchesListProps, "scoreBoardInstance" | "setError">;
 
 export const MatchItem = ({
   match,
   scoreBoardInstance,
   setEditError,
   setError,
-  refreshSummary,
 }: MatchItemProps) => {
   const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
   const [editHomeScore, setEditHomeScore] = useState<number>(0);
@@ -25,7 +21,6 @@ export const MatchItem = ({
   const handleFinishGame = (matchId: MatchId) => {
     try {
       scoreBoardInstance.finishGame({ id: matchId });
-      refreshSummary(); // Update UI
     } catch (err) {
       if (err instanceof Error) setError(err.message);
     }
@@ -56,7 +51,7 @@ export const MatchItem = ({
         homeScore: editHomeScore,
         awayScore: editAwayScore,
       });
-      refreshSummary(); // Update UI with new score
+      
       setEditingMatchId(null); // Exit edit mode
     } catch (err) {
       if (err instanceof Error) setEditError(err.message);

@@ -6,14 +6,12 @@ type NewGameFormProps = {
   scoreBoardInstance: ScoreBoard;
   error: string;
   setError: Dispatch<React.SetStateAction<string>>;
-  refreshSummary: () => void;
 };
 
 export const NewGameForm = ({
   scoreBoardInstance,
   error,
   setError,
-  refreshSummary,
 }: NewGameFormProps) => {
   const [homeTeam, setHomeTeam] = useState<string>("");
   const [awayTeam, setAwayTeam] = useState<string>("");
@@ -27,8 +25,6 @@ export const NewGameForm = ({
 
       setHomeTeam("");
       setAwayTeam("");
-
-      refreshSummary(); // Update UI
     } catch (err) {
       if (err instanceof Error) setError(err.message);
     }

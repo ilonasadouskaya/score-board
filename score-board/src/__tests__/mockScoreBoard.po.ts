@@ -1,8 +1,22 @@
-import type { Match } from "../lib/types";
+import type { Listener, Match } from "../lib/types";
 
 export const mockMatches: Match[] = [];
 
 export const mockScoreBoard = {
+  _listeners: [] as Listener[],
+
+  subscribe(callback: Listener) {
+    this._listeners.push(callback);
+
+    return () => {
+      this._listeners = this._listeners.filter((cb) => cb !== callback);
+    };
+  },
+
+  _notifyListeners() {
+    this._listeners.forEach((cb) => cb());
+  },
+
   startGame: vi.fn((home, away) => {
     if (home === "" || away === "") throw new Error("Team names required");
 
@@ -18,6 +32,8 @@ export const mockScoreBoard = {
     };
     mockMatches.push(newMatch);
 
+    mockScoreBoard._notifyListeners()
+
     return newMatch.id;
   }),
 
@@ -27,6 +43,8 @@ export const mockScoreBoard = {
     if (index === -1) throw new Error("Match not found");
 
     mockMatches.splice(index, 1);
+
+    mockScoreBoard._notifyListeners()
   }),
 
   updateScore: vi.fn((id, home, away) => {
@@ -38,6 +56,8 @@ export const mockScoreBoard = {
 
     match.homeScore = home;
     match.awayScore = away;
+
+    mockScoreBoard._notifyListeners()
   }),
 
   getSummary: vi.fn(() => {

@@ -1,8 +1,23 @@
-import type { Match, MatchId } from "./types";
+import type { Listener, Match, MatchId } from "./types";
 
 class ScoreBoard {
   private matches: Map<MatchId, Match> = new Map();
   private nextMatchId: number = 1;
+  private listeners: Listener[] = [];
+
+  subscribe(callback: Listener) {
+    this.listeners.push(callback);
+
+    return () => this.unsubscribe(callback);
+  }
+
+  unsubscribe(callback: Listener) {
+    this.listeners = this.listeners.filter((listener) => listener !== callback);
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach((callback) => callback());
+  }
 
   startGame({ homeTeam, awayTeam }: Pick<Match, "homeTeam" | "awayTeam">) {
     if (homeTeam === awayTeam) {
@@ -21,6 +36,8 @@ class ScoreBoard {
     });
     this.matches.set(matchId, matchData);
 
+    this.notifyListeners()
+
     return matchId;
   }
 
@@ -30,6 +47,8 @@ class ScoreBoard {
     }
 
     this.matches.delete(matchId);
+
+    this.notifyListeners()
   }
 
   updateScore({
@@ -49,6 +68,8 @@ class ScoreBoard {
 
     match.homeScore = homeScore;
     match.awayScore = awayScore;
+
+    this.notifyListeners()
   }
 
   getSummary() {

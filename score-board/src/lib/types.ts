@@ -1,4 +1,4 @@
-export type MatchId = string
+export type MatchId = string;
 
 export type Match = {
   id: MatchId;
@@ -8,3 +8,5 @@ export type Match = {
   awayScore: number;
   startedAt: number;
 };
+
+export type Listener = () => void;

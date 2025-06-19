@@ -7,7 +7,6 @@ export const MatchesList = ({
   scoreBoardInstance,
   matches,
   setError,
-  refreshSummary,
 }: MatchesListProps) => {
   const [editError, setEditError] = useState<string>("");
 
@@ -32,7 +31,6 @@ export const MatchesList = ({
                 scoreBoardInstance={scoreBoardInstance}
                 setEditError={setEditError}
                 setError={setError}
-                refreshSummary={refreshSummary}
               />
             </li>
           ))}

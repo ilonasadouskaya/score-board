@@ -7,5 +7,4 @@ export type MatchesListProps = {
   scoreBoardInstance: ScoreBoard;
   matches: Match[];
   setError: Dispatch<React.SetStateAction<string>>;
-  refreshSummary: () => void;
 };
