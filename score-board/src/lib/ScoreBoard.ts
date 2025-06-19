@@ -21,7 +21,15 @@ class ScoreBoard {
     });
     this.matches.set(matchId, matchData);
 
-    return matchId
+    return matchId;
+  }
+
+  finishGame({ id: matchId }: Pick<Match, "id">) {
+    if (!this.matches.has(matchId)) {
+      throw new Error(`Match with ID "${matchId}" not found.`);
+    }
+
+    this.matches.delete(matchId);
   }
 
   getSummary() {

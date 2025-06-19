@@ -80,6 +80,34 @@ describe("Score board", () => {
     });
   });
 
+  describe("finishGame", () => {
+    it("should remove a game when finished", () => {
+      const matchId1 = scoreBoard.startGame({
+        homeTeam: "Mexico",
+        awayTeam: "Canada",
+      });
+      scoreBoard.startGame({ homeTeam: "Spain", awayTeam: "Brazil" });
+
+      // Verify that 2 new games were added
+      expect(scoreBoard.getSummary().length).toBe(2);
+
+      scoreBoard.finishGame({ id: matchId1 });
+
+      const summary = scoreBoard.getSummary();
+      // Verify that 1st game was removed
+      expect(summary.length).toBe(1);
+      expect(summary[0].homeTeam).toBe("Spain");
+    });
+
+    it("should throw error if finishing non-existent game", () => {
+      const id = "non-existent-id";
+
+      expect(() => scoreBoard.finishGame({ id })).toThrow(
+        `Match with ID "${id}" not found.`
+      );
+    });
+  });
+
   describe("getSummary", () => {
     it("should return summary ordered by total score (descending) and then by most recently added (descending)", () => {
       // Simulate adding games at slightly different times for 'most recently added' check
