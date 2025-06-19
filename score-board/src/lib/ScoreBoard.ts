@@ -32,6 +32,25 @@ class ScoreBoard {
     this.matches.delete(matchId);
   }
 
+  updateScore({
+    id: matchId,
+    homeScore,
+    awayScore,
+  }: Pick<Match, "id" | "homeScore" | "awayScore">) {
+    if (homeScore < 0 || awayScore < 0) {
+      throw new Error("Scores must be non-negative numbers.");
+    }
+
+    const match = this.matches.get(matchId);
+
+    if (!match) {
+      throw new Error(`Match with ID "${matchId}" not found.`);
+    }
+
+    match.homeScore = homeScore;
+    match.awayScore = awayScore;
+  }
+
   getSummary() {
     return [...this.matches.values()].sort((a, b) => {
       const totalScoreA = a.homeScore + a.awayScore;

@@ -1,5 +1,8 @@
 import ScoreBoard from "../ScoreBoard";
 
+const homeTeam = "Poland";
+const awayTeam = "Portugal";
+
 describe("Score board", () => {
   let scoreBoard: ScoreBoard;
 
@@ -15,9 +18,6 @@ describe("Score board", () => {
   });
 
   describe("startGame", () => {
-    const homeTeam = "Poland";
-    const awayTeam = "Portugal";
-
     it("should start a new game with initial score 0-0", () => {
       const matchId = scoreBoard.startGame({ homeTeam, awayTeam });
       const summary = scoreBoard.getSummary();
@@ -82,10 +82,7 @@ describe("Score board", () => {
 
   describe("finishGame", () => {
     it("should remove a game when finished", () => {
-      const matchId1 = scoreBoard.startGame({
-        homeTeam: "Mexico",
-        awayTeam: "Canada",
-      });
+      const matchId1 = scoreBoard.startGame({ homeTeam, awayTeam });
       scoreBoard.startGame({ homeTeam: "Spain", awayTeam: "Brazil" });
 
       // Verify that 2 new games were added
@@ -108,23 +105,72 @@ describe("Score board", () => {
     });
   });
 
+  describe("updateScore", () => {
+    it("should update the score of an existing game", () => {
+      const matchId = scoreBoard.startGame({ homeTeam, awayTeam });
+      scoreBoard.updateScore({ id: matchId, homeScore: 2, awayScore: 1 });
+
+      const summary = scoreBoard.getSummary();
+      // Verify correct score set
+      expect(summary.length).toBe(1);
+      expect(summary[0].homeScore).toBe(2);
+      expect(summary[0].awayScore).toBe(1);
+    });
+
+    it("should throw error if updating score for non-existent game", () => {
+      const id = "non-existent-id";
+
+      expect(() =>
+        scoreBoard.updateScore({ id, homeScore: 1, awayScore: 0 })
+      ).toThrow(`Match with ID "${id}" not found.`);
+    });
+
+    it("should throw error if scores are negative", () => {
+      const matchId = scoreBoard.startGame({ homeTeam, awayTeam });
+
+      expect(() =>
+        scoreBoard.updateScore({ id: matchId, homeScore: -1, awayScore: 0 })
+      ).toThrow("Scores must be non-negative numbers.");
+
+      expect(() =>
+        scoreBoard.updateScore({ id: matchId, homeScore: 1, awayScore: -5 })
+      ).toThrow("Scores must be non-negative numbers.");
+    });
+  });
+
   describe("getSummary", () => {
     it("should return summary ordered by total score (descending) and then by most recently added (descending)", () => {
       // Simulate adding games at slightly different times for 'most recently added' check
-      scoreBoard.startGame({ homeTeam: "Germany", awayTeam: "France" }); // Added earliest
+
+      // Added earliest, total: 4 (2+2)
+      const matchId1 = scoreBoard.startGame({
+        homeTeam: "Germany",
+        awayTeam: "France",
+      });
+      scoreBoard.updateScore({ id: matchId1, homeScore: 2, awayScore: 2 });
       vi.advanceTimersByTime(10);
 
-      scoreBoard.startGame({ homeTeam: "Argentina", awayTeam: "Australia" }); // Added second
+      // Added second, total: 4 (3+1)
+      const matchId2 = scoreBoard.startGame({
+        homeTeam: "Argentina",
+        awayTeam: "Australia",
+      });
+      scoreBoard.updateScore({ id: matchId2, homeScore: 3, awayScore: 1 });
       vi.advanceTimersByTime(10);
 
-      scoreBoard.startGame({ homeTeam: "Uruguay", awayTeam: "Italy" }); // Added third
+      // Added third, total: 12 (6+6)
+      const matchId3 = scoreBoard.startGame({
+        homeTeam: "Uruguay",
+        awayTeam: "Italy",
+      });
+      scoreBoard.updateScore({ id: matchId3, homeScore: 6, awayScore: 6 });
 
       const summary = scoreBoard.getSummary();
       expect(summary.length).toBe(3);
 
-      expect(summary[0].homeTeam).toBe("Uruguay");
-      expect(summary[1].homeTeam).toBe("Argentina");
-      expect(summary[2].homeTeam).toBe("Germany");
+      expect(summary[0].homeTeam).toBe("Uruguay"); // highest total score (12)
+      expect(summary[1].homeTeam).toBe("Argentina"); // same score as Germany (4), added 2nd
+      expect(summary[2].homeTeam).toBe("Germany"); // same score as Argentina (4), added 1st
     });
 
     it("should return empty summary if no games are active", () => {
